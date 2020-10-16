@@ -6,26 +6,19 @@ public class Factorization implements Runnable {
 
     Long numberToFactor;
     int bit;
-    long[] allNumbers;
     boolean[] isPrimeArray;
 
     public Factorization(Long numberToFactor, int bit) {
         this.numberToFactor = numberToFactor;
         this.bit = bit;
-
-        allNumbers = new long[(int) Math.ceil(Math.sqrt(numberToFactor))];
-        for (int i = 0; i < allNumbers.length; i++) {
-            allNumbers[i] = i;
-        }
         isPrimeArray = new boolean[(int) Math.ceil(Math.sqrt(numberToFactor))];
         Arrays.fill(isPrimeArray, true);
-
     }
 
     public void combine() {
 
 
-        if (!isPrime(numberToFactor)) {
+        if (!isPrimeWithoutArray(numberToFactor)) {
 
             long startPrimeNumbers = System.nanoTime();
             ArrayList<Long> potentialFactors = getPrimeListSieve();
@@ -59,9 +52,9 @@ public class Factorization implements Runnable {
 
         long boundary = (long) Math.ceil(Math.sqrt(input));
 
-        for (int i = 2; i < allNumbers.length && i <= boundary; i++) {
+        for (int i = 2; i < isPrimeArray.length && i <= boundary; i++) {
             if (isPrimeArray[i]) {
-                if (input % allNumbers[i] == 0) {
+                if (input % i == 0) {
                     return false;
                 }
             }
@@ -69,20 +62,32 @@ public class Factorization implements Runnable {
         return true;
     }
 
+    public boolean isPrimeWithoutArray(Long input) {
+
+        long boundary = (long) Math.ceil(Math.sqrt(input));
+        for (long i = 2; i != input && i <= boundary; i++) {
+            if (input % i == 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+
     public ArrayList<Long> getPrimeListSieve() {
 
-        for (int i = 2; i < allNumbers.length && isPrimeArray[i]; i++) {
-            if (isPrime(allNumbers[i])) {
-                for (int j = 2; j * allNumbers[i] < allNumbers.length; j++) {
-                    isPrimeArray[(int) (j * allNumbers[i])] = false;
+        for (long i = 2; i < isPrimeArray.length && isPrimeArray[(int) i]; i++) {
+            if (isPrime(i)) {
+                for (int j = 2; j * i < isPrimeArray.length; j++) {
+                    isPrimeArray[(int) (j * i)] = false;
                 }
             }
         }
 
         ArrayList<Long> potentialFactors = new ArrayList<>();
-        for (int i = 2; i < allNumbers.length; i++) {
-            if (isPrimeArray[i]) {
-                potentialFactors.add(allNumbers[i]);
+        for (long i = 2; i < isPrimeArray.length; i++) {
+            if (isPrimeArray[(int) i]) {
+                potentialFactors.add(i);
             }
         }
 
