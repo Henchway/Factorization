@@ -1,35 +1,47 @@
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedList;
 
-public class Factorization {
 
-    public static void main(String[] args) {
+public class Factorization implements Runnable {
 
-        combine((long) Math.pow(2, 50) - 1);
+    Long numberToFactor;
+    int bit;
+    long[] allNumbers;
+    boolean[] isPrimeArray;
+
+    public Factorization(Long numberToFactor, int bit) {
+        this.numberToFactor = numberToFactor;
+        this.bit = bit;
+
+        allNumbers = new long[(int) Math.ceil(Math.sqrt(numberToFactor))];
+        for (int i = 0; i < allNumbers.length; i++) {
+            allNumbers[i] = i;
+        }
+        isPrimeArray = new boolean[(int) Math.ceil(Math.sqrt(numberToFactor))];
+        Arrays.fill(isPrimeArray, true);
 
     }
 
-    public static void combine(Long numberToFactor) {
+    public void combine() {
 
-        System.out.println("##############################################");
-        System.out.println("Number to factor: " + numberToFactor);
 
         if (!isPrime(numberToFactor)) {
 
             long startPrimeNumbers = System.nanoTime();
-            ArrayList<Long> potentialFactors = getPrimeList(numberToFactor);
-            long endPrimeNumbers = System.nanoTime();
+            ArrayList<Long> potentialFactors = getPrimeListSieve();
 
+            long endPrimeNumbers = System.nanoTime();
 //            System.out.println("Potential factors are " + Arrays.toString(potentialFactors.toArray()));
             long timeElapsedPrimeNumbers = (endPrimeNumbers - startPrimeNumbers) / 1000000;
-            System.out.println("The calculation of prime numbers took " + timeElapsedPrimeNumbers + " ms");
+
 
             long start = System.nanoTime();
             ArrayList<Long> factors = factorize(numberToFactor, potentialFactors);
             long end = System.nanoTime();
 
+            System.out.println("##############################################");
+            System.out.println("Number to factor: " + numberToFactor + ", " + bit + " bits");
+            System.out.println("The calculation of prime numbers took " + timeElapsedPrimeNumbers + " ms");
             System.out.println("The prime factors are " + Arrays.toString(factors.toArray()));
             long timeElapsed = (end - start) / 1000000;
             System.out.println("The calculation of the factors took " + timeElapsed + " ms");
@@ -38,63 +50,75 @@ public class Factorization {
             System.out.println("The prime factor is " + numberToFactor);
         }
 
+
         System.out.println("##############################################");
 
     }
 
-
-    public static boolean isPrime(Long input) {
+    public boolean isPrime(Long input) {
 
         long boundary = (long) Math.ceil(Math.sqrt(input));
 
-        for (long i = 2; i != input && i <= boundary; i++) {
-            if (input % i == 0) {
-                return false;
+        for (int i = 2; i < allNumbers.length && i <= boundary; i++) {
+            if (isPrimeArray[i]) {
+                if (input % allNumbers[i] == 0) {
+                    return false;
+                }
             }
         }
         return true;
-
     }
 
-    public static ArrayList<Long> getPrimeList(Long upperLimit) {
+    public ArrayList<Long> getPrimeListSieve() {
 
-        ArrayList<Long> sieveList = new ArrayList<>();
-        for (long i = 2; i < Math.ceil(Math.sqrt(upperLimit)); i++) {
-            sieveList.add(i);
-        }
-
-        for (int i = 0; i < sieveList.size(); i++) {
-            long number = sieveList.get(i);
-            if (isPrime(number)) {
-                int j = 2;
-
-                while(number * j < Math.ceil(Math.sqrt(upperLimit))) {
-                    sieveList.remove((number *j));
-                    j++;
+        for (int i = 2; i < allNumbers.length && isPrimeArray[i]; i++) {
+            if (isPrime(allNumbers[i])) {
+                for (int j = 2; j * allNumbers[i] < allNumbers.length; j++) {
+                    isPrimeArray[(int) (j * allNumbers[i])] = false;
                 }
-
             }
         }
 
-        return sieveList;
+        ArrayList<Long> potentialFactors = new ArrayList<>();
+        for (int i = 2; i < allNumbers.length; i++) {
+            if (isPrimeArray[i]) {
+                potentialFactors.add(allNumbers[i]);
+            }
+        }
+
+        return potentialFactors;
 
     }
 
-    public static ArrayList<Long> factorize(Long input, ArrayList<Long> potentialFactors) {
+    public ArrayList<Long> factorize(Long input, ArrayList<Long> potentialFactors) {
 
         ArrayList<Long> factors = new ArrayList<>();
+        Long toBeFactored = input;
+        int i = 0;
+        while (i < potentialFactors.size()) {
+            while (toBeFactored % potentialFactors.get(i) == 0) {
+                factors.add(potentialFactors.get(i));
+                toBeFactored = toBeFactored / potentialFactors.get(i);
 
-        potentialFactors.forEach(Long -> {
-
-            Long toBeFactored = input;
-            while (toBeFactored % Long == 0) {
-                factors.add(Long);
-                toBeFactored = toBeFactored / Long;
+                if (factors.size() > 0) {
+                    long readyCheck = 1;
+                    for (Long factor : factors) {
+                        readyCheck *= factor;
+                    }
+                    if (readyCheck == input) {
+                        return factors;
+                    }
+                }
             }
-        });
+            i++;
+        }
 
         return factors;
     }
 
 
+    @Override
+    public void run() {
+        combine();
+    }
 }
