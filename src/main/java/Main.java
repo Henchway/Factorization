@@ -3,7 +3,7 @@ public class Main {
     public static void main(String[] args) {
 
 
-        Factorization factorization = new Factorization((long) Math.pow(2, 57) - 1, 57);
+        Factorization factorization = new Factorization((long) Math.pow(2, 30) + 1, 25);
         factorization.run();
 
 //        for (int i = 0; i < 4; i++) {

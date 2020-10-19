@@ -6,30 +6,26 @@ public class Factorization implements Runnable {
 
     Long numberToFactor;
     int bit;
-    boolean[] isPrimeArray;
+    ArrayList<Long> primeArrayList = new ArrayList<>();
 
     public Factorization(Long numberToFactor, int bit) {
         this.numberToFactor = numberToFactor;
         this.bit = bit;
-        isPrimeArray = new boolean[(int) Math.ceil(Math.sqrt(numberToFactor))];
-        Arrays.fill(isPrimeArray, true);
     }
 
     public void combine() {
 
-
         if (!isPrimeWithoutArray(numberToFactor)) {
 
             long startPrimeNumbers = System.nanoTime();
-            ArrayList<Long> potentialFactors = getPrimeListSieve();
-
+            getPrimeList(numberToFactor);
             long endPrimeNumbers = System.nanoTime();
-//            System.out.println("Potential factors are " + Arrays.toString(potentialFactors.toArray()));
+//            System.out.println("Potential factors are " + Arrays.toString(primeArrayList.toArray()));
             long timeElapsedPrimeNumbers = (endPrimeNumbers - startPrimeNumbers) / 1000000;
 
 
             long start = System.nanoTime();
-            ArrayList<Long> factors = factorize(numberToFactor, potentialFactors);
+            ArrayList<Long> factors = factorize(numberToFactor);
             long end = System.nanoTime();
 
             System.out.println("##############################################");
@@ -52,13 +48,14 @@ public class Factorization implements Runnable {
 
         long boundary = (long) Math.ceil(Math.sqrt(input));
 
-        for (int i = 2; i < isPrimeArray.length && i <= boundary; i++) {
-            if (isPrimeArray[i]) {
-                if (input % i == 0) {
-                    return false;
-                }
+        for (int i = 0; i < primeArrayList.size() && primeArrayList.get(i) <= boundary; i++) {
+
+            if (input % primeArrayList.get(i) == 0 && !input.equals(primeArrayList.get(i))) {
+                return false;
             }
+
         }
+
         return true;
     }
 
@@ -74,36 +71,25 @@ public class Factorization implements Runnable {
     }
 
 
-    public ArrayList<Long> getPrimeListSieve() {
 
-        for (long i = 2; i < isPrimeArray.length && isPrimeArray[(int) i]; i++) {
-            if (isPrime(i)) {
-                for (int j = 2; j * i < isPrimeArray.length; j++) {
-                    isPrimeArray[(int) (j * i)] = false;
-                }
+    public void getPrimeList(long i) {
+        for (long j = 2; j < i/2; j++) {
+            if (isPrime(j)) {
+                primeArrayList.add(j);
             }
         }
-
-        ArrayList<Long> potentialFactors = new ArrayList<>();
-        for (long i = 2; i < isPrimeArray.length; i++) {
-            if (isPrimeArray[(int) i]) {
-                potentialFactors.add(i);
-            }
-        }
-
-        return potentialFactors;
-
     }
 
-    public ArrayList<Long> factorize(Long input, ArrayList<Long> potentialFactors) {
+
+    public ArrayList<Long> factorize(Long input) {
 
         ArrayList<Long> factors = new ArrayList<>();
         Long toBeFactored = input;
         int i = 0;
-        while (i < potentialFactors.size()) {
-            while (toBeFactored % potentialFactors.get(i) == 0) {
-                factors.add(potentialFactors.get(i));
-                toBeFactored = toBeFactored / potentialFactors.get(i);
+        while (i < primeArrayList.size()) {
+            while (toBeFactored % primeArrayList.get(i) == 0) {
+                factors.add(primeArrayList.get(i));
+                toBeFactored = toBeFactored / primeArrayList.get(i) ;
 
                 if (factors.size() > 0) {
                     long readyCheck = 1;
