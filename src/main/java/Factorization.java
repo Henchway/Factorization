@@ -11,7 +11,7 @@ public class Factorization implements Runnable {
     public Factorization(Long numberToFactor, int bit) {
         this.numberToFactor = numberToFactor;
         this.bit = bit;
-        isPrimeArray = new boolean[(int) Math.ceil(Math.sqrt(numberToFactor))];
+        isPrimeArray = new boolean[Math.toIntExact(numberToFactor / 2)];
         Arrays.fill(isPrimeArray, true);
     }
 
@@ -21,7 +21,7 @@ public class Factorization implements Runnable {
         if (!isPrimeWithoutArray(numberToFactor)) {
 
             long startPrimeNumbers = System.nanoTime();
-            ArrayList<Long> potentialFactors = getPrimeListSieve();
+            long[] potentialFactors = getPrimeListSieve();
 
             long endPrimeNumbers = System.nanoTime();
 //            System.out.println("Potential factors are " + Arrays.toString(potentialFactors.toArray()));
@@ -54,7 +54,7 @@ public class Factorization implements Runnable {
 
         for (int i = 2; i < isPrimeArray.length && i <= boundary; i++) {
             if (isPrimeArray[i]) {
-                if (input % i == 0) {
+                if (input % i == 0 && input != i) {
                     return false;
                 }
             }
@@ -74,7 +74,7 @@ public class Factorization implements Runnable {
     }
 
 
-    public ArrayList<Long> getPrimeListSieve() {
+    public long[] getPrimeListSieve() {
 
         for (long i = 2; i < isPrimeArray.length && isPrimeArray[(int) i]; i++) {
             if (isPrime(i)) {
@@ -84,26 +84,36 @@ public class Factorization implements Runnable {
             }
         }
 
-        ArrayList<Long> potentialFactors = new ArrayList<>();
-        for (long i = 2; i < isPrimeArray.length; i++) {
-            if (isPrimeArray[(int) i]) {
-                potentialFactors.add(i);
+        int arraySize = 0;
+        for (int i = 2; i < isPrimeArray.length; i++) {
+            if (isPrimeArray[i]) {
+                arraySize++;
+            }
+        }
+
+        long[] potentialFactors = new long[arraySize];
+
+        for (int i = 2, j = 0; i < isPrimeArray.length; i++) {
+            if (isPrimeArray[i]) {
+                potentialFactors[j] = i;
+                j++;
             }
         }
 
         return potentialFactors;
 
+
     }
 
-    public ArrayList<Long> factorize(Long input, ArrayList<Long> potentialFactors) {
+    public ArrayList<Long> factorize(Long input, long[] potentialFactors) {
 
         ArrayList<Long> factors = new ArrayList<>();
         Long toBeFactored = input;
         int i = 0;
-        while (i < potentialFactors.size()) {
-            while (toBeFactored % potentialFactors.get(i) == 0) {
-                factors.add(potentialFactors.get(i));
-                toBeFactored = toBeFactored / potentialFactors.get(i);
+        while (i < potentialFactors.length) {
+            while (toBeFactored % potentialFactors[i] == 0) {
+                factors.add(potentialFactors[i]);
+                toBeFactored = toBeFactored / potentialFactors[i];
 
                 if (factors.size() > 0) {
                     long readyCheck = 1;
