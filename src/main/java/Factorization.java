@@ -51,25 +51,6 @@ public class Factorization implements Runnable {
 
         }
 
-//
-//        while (i <= input / 2) {
-//
-//            if (toBeFactored % i == 0) {
-//                factors.add(i);
-//                toBeFactored = toBeFactored / i;
-//            }
-//
-//            if (toBeFactored % i != 0) {
-//                i++;
-//            }
-//
-//
-//
-//            if (i % 16777216 == 0) {
-//                System.out.println(Arrays.toString(factors.toArray()) + ", i: " + i);
-//            }
-//        }
-
         return factors;
     }
 
